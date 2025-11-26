@@ -18,12 +18,7 @@ function extractContacts(text) {
 export async function scrapePosts(maxScroll = 6) {
     console.log("🚀 Launching browser...");
     const startTime = Date.now()
-    const browser = await chromium.launch({
-        channel: "chrome",
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
-
+    const browser = await chromium.launch({ headless: true });
 
     if (!fs.existsSync(cookiesFilePath)) {
         console.log("❌ cookies.json missing — pehle manually login karo aur cookies save karo.");
