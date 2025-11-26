@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Email Sender Dashboard - Dark Mode</title>
+    <style>
+      /* ===== DARK MODE ===== */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+        background: #0d1117; /* dark background */
+        color: #e6edf3; /* text color */
+      }
+
+      button {
+        padding: 10px 20px;
+        background: #238636; /* GitHub green */
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      button:hover {
+        background: #2ea043;
+      }
+
+      button:disabled {
+        background: gray;
+        cursor: not-allowed;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 25px;
+        table-layout: fixed;
+        background: #161b22; /* table dark bg */
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #30363d; /* subtle border */
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background: #21262d; /* darker header */
+        color: #e6edf3;
+      }
+
+      #header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .tableHeaders {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      h3 {
+        margin: 0px;
+        align-items: center;
+        color: #e6edf3;
+      }
+
+      #status {
+        color: #58a6ff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header">
+      <h2>Email Sender Dashboard</h2>
+      <button id="delteBtn">Delete Email lists</button>
+      <button id="sendBtn">Send Emails</button>
+    </div>
+
+    <p id="status"></p>
+
+    <div class="tableHeaders">
+      <h3>Today</h3>
+      <h3 id="todayCounter"></h3>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 80%">Email</th>
+          <th>Sent At</th>
+        </tr>
+      </thead>
+      <tbody id="todayTable"></tbody>
+    </table>
+
+    <div class="tableHeaders">
+      <h3>Yesterday</h3>
+      <h3 id="yesterdayCounter"></h3>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 80%">Email</th>
+          <th>Sent At</th>
+        </tr>
+      </thead>
+      <tbody id="yesterdayTable"></tbody>
+    </table>
+
+    <div class="tableHeaders">
+      <h3>Last 7 Days</h3>
+      <h3 id="last7daysCounter"></h3>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 80%">Email</th>
+          <th>Sent At</th>
+        </tr>
+      </thead>
+      <tbody id="last7daysTable"></tbody>
+    </table>
+
+    <script>
+      const API_BASE = ""; // same domain
+
+      document.getElementById("sendBtn").addEventListener("click", async () => {
+        const btn = document.getElementById("sendBtn");
+        btn.disabled = true;
+        document.getElementById("status").innerText = "Sending emails...";
+
+        try {
+          const res = await fetch(`${API_BASE}/send`);
+          const data = await res.json();
+          document.getElementById("status").innerText = data.message;
+
+          loadEmails();
+        } catch (e) {
+          document.getElementById("status").innerText = "Error sending emails";
+        }
+
+        btn.disabled = false;
+      });
+      document
+        .getElementById("delteBtn")
+        .addEventListener("click", async () => {
+          const btn = document.getElementById("delteBtn");
+          btn.disabled = true;
+          document.getElementById("status").innerText =
+            "Deleting old emails...";
+
+          try {
+            const res = await fetch(`${API_BASE}/clean`, {
+              method: "DELETE",
+            });
+            const data = await res.json();
+            document.getElementById("status").innerText = data.message;
+
+            loadEmails(); // Refresh tables
+          } catch (e) {
+            document.getElementById("status").innerText =
+              "Error deleting emails";
+          }
+
+          btn.disabled = false;
+        });
+
+      async function loadEmails() {
+        try {
+          const res = await fetch(`${API_BASE}/sent-emails`);
+          const data = await res.json();
+
+          document.getElementById("todayTable").innerHTML = "";
+          document.getElementById("todayCounter").innerHTML = data.today.length;
+
+          document.getElementById("yesterdayTable").innerHTML = "";
+          document.getElementById("yesterdayCounter").innerHTML =
+            data.yesterday.length;
+
+          document.getElementById("last7daysTable").innerHTML = "";
+          document.getElementById("last7daysCounter").innerHTML =
+            data.last7days.length;
+
+          data.today.forEach((item) => {
+            document.getElementById("todayTable").innerHTML += `
+          <tr>
+            <td>${item.email}</td>
+            <td>${item.sentAt}</td>
+          </tr>`;
+          });
+
+          data.yesterday.forEach((item) => {
+            document.getElementById("yesterdayTable").innerHTML += `
+          <tr>
+            <td>${item.email}</td>
+            <td>${item.sentAt}</td>
+          </tr>`;
+          });
+
+          data.last7days.forEach((item) => {
+            document.getElementById("last7daysTable").innerHTML += `
+          <tr>
+            <td>${item.email}</td>
+            <td>${item.sentAt}</td>
+          </tr>`;
+          });
+        } catch (e) {
+          console.log("Error loading emails", e);
+        }
+      }
+
+      loadEmails();
+    </script>
+  </body>
+</html>
