@@ -5,6 +5,8 @@ import path from "path";
 import { scrapePosts } from "./linkedin_scraper.js";
 import { sendMail } from "./sendMail.js";
 import getISTTimestamp from "./utils/time.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express()
 app.use(express.json())
