@@ -1,3 +1,6 @@
 node_modules/
 .env
+emailSent.json
+cookies.json
+.DS_Store
 
