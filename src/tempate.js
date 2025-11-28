@@ -10,7 +10,6 @@ With nearly three years of backend development experience, I have worked extensi
 <p><strong>Here are a few highlights of my experience:</strong></p>
 <ul>
   <li>At <strong>Conscent.ai</strong>: Optimized analytics pipelines and backend APIs, improved accuracy and performance of analytics, and created custom event tracking functionality.</li>
-  <li>At <strong>Wolooka Technologies</strong>: Integrated AI-powered features using OpenAI APIs — including chat with AI and AI-based quiz generation for students.</li>
   <li>Skilled in system design, database modeling, debugging, and clean architecture.</li>
   <li>Collaborative, reliable, and focused on writing maintainable, scalable code.</li>
 </ul>
