@@ -4,6 +4,53 @@ import { scrapePosts } from "./linkedin_scraper.js";
 import { sendMail } from "./sendMail.js";
 import getISTTimestamp from "./utils/time.js";
 
+async function processEmails() {
+
+    console.log("processEmails called")
+    const emailFilePath = path.join(process.cwd(), "src", "emailSent.json");
+
+    const emails = await scrapePosts();
+
+    // Load sent emails file
+    let sentEmails = [];
+    if (fs.existsSync(emailFilePath)) {
+        sentEmails = JSON.parse(fs.readFileSync(emailFilePath, "utf8"));
+    }
+
+    // Convert to set for fast lookup
+    const sentSet = new Set(sentEmails.map(item => item.email));
+
+    for (const email of emails) {
+
+        // Skip if already sent
+        if (sentSet.has(email)) {
+            continue;
+        }
+
+        try {
+            await sendMail(email);
+            console.log("📨 Sent:", email);
+
+            // Create timestamp
+            const sentAt = getISTTimestamp()
+
+            // Add to file memory
+            sentEmails.push({ email, sentAt });
+
+            // Save updated file
+            fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
+
+            console.log("⏳ waiting for 30 sec");
+            await new Promise(res => setTimeout(res, 30000));
+
+        } catch (err) {
+            console.log("❌ Failed:", email, err.response || err);
+        }
+    }
+
+
+    console.log({ message: '✅ completed' })
+}
 
 export const health = (req, res) => {
     res.json({ message: "Good" })
@@ -66,51 +113,7 @@ export const sentEmails = (req, res) => {
 
 export const send = async (req, res) => {
     console.log(new Date() + 5)
-
-    console.log("api called")
-    const emailFilePath = path.join(process.cwd(), "src", "emailSent.json");
-
-    const emails = await scrapePosts();
-
-    // Load sent emails file
-    let sentEmails = [];
-    if (fs.existsSync(emailFilePath)) {
-        sentEmails = JSON.parse(fs.readFileSync(emailFilePath, "utf8"));
-    }
-
-    // Convert to set for fast lookup
-    const sentSet = new Set(sentEmails.map(item => item.email));
-
-    for (const email of emails) {
-
-        // Skip if already sent
-        if (sentSet.has(email)) {
-            continue;
-        }
-
-        try {
-            await sendMail(email);
-            console.log("📨 Sent:", email);
-
-            // Create timestamp
-            const sentAt = getISTTimestamp()
-
-            // Add to file memory
-            sentEmails.push({ email, sentAt });
-
-            // Save updated file
-            fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
-
-            console.log("⏳ waiting for 30 sec");
-            await new Promise(res => setTimeout(res, 30000));
-
-        } catch (err) {
-            console.log("❌ Failed:", email, err.response || err);
-        }
-    }
-
-
-    console.log({ message: '✅ completed' })
+    await processEmails();
     res.json({ message: '✅ completed' });
 }
 
