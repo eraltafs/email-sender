@@ -50,6 +50,7 @@ async function processEmails() {
                 fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
 
                 console.log("⏳ waiting for 30 sec");
+                first = false;
 
             } catch (err) {
                 console.log("❌ Failed:", email, err.response || err);
