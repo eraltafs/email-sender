@@ -25,7 +25,7 @@ async function processEmails() {
 
         // Convert to set for fast lookup
         const sentSet = new Set(sentEmails.map(item => item.email));
-
+        let first = true;
         for (const email of emails) {
 
             // Skip if already sent
@@ -34,6 +34,9 @@ async function processEmails() {
             }
 
             try {
+                if (!first) {
+                    await new Promise(res => setTimeout(res, 30000));
+                }
                 await sendMail(email);
                 console.log("📨 Sent:", email);
 
@@ -47,7 +50,6 @@ async function processEmails() {
                 fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
 
                 console.log("⏳ waiting for 30 sec");
-                await new Promise(res => setTimeout(res, 30000));
 
             } catch (err) {
                 console.log("❌ Failed:", email, err.response || err);
