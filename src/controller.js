@@ -3,53 +3,64 @@ import path from "path";
 import { scrapePosts } from "./linkedin_scraper.js";
 import { sendMail } from "./sendMail.js";
 import getISTTimestamp from "./utils/time.js";
-
+let isRunning = false;
 async function processEmails() {
-
-    console.log("processEmails called")
-    const emailFilePath = path.join(process.cwd(), "src", "emailSent.json");
-
-    const emails = await scrapePosts();
-
-    // Load sent emails file
-    let sentEmails = [];
-    if (fs.existsSync(emailFilePath)) {
-        sentEmails = JSON.parse(fs.readFileSync(emailFilePath, "utf8"));
+    if (isRunning) {
+        console.log("⏭️ Previous job still running, skipping this run");
+        return;
     }
 
-    // Convert to set for fast lookup
-    const sentSet = new Set(sentEmails.map(item => item.email));
+    isRunning = true;
+    try {
+        console.log("🚀 Email process started");
+        const emailFilePath = path.join(process.cwd(), "src", "emailSent.json");
 
-    for (const email of emails) {
+        const emails = await scrapePosts();
 
-        // Skip if already sent
-        if (sentSet.has(email)) {
-            continue;
+        // Load sent emails file
+        let sentEmails = [];
+        if (fs.existsSync(emailFilePath)) {
+            sentEmails = JSON.parse(fs.readFileSync(emailFilePath, "utf8"));
         }
 
-        try {
-            await sendMail(email);
-            console.log("📨 Sent:", email);
+        // Convert to set for fast lookup
+        const sentSet = new Set(sentEmails.map(item => item.email));
 
-            // Create timestamp
-            const sentAt = getISTTimestamp()
+        for (const email of emails) {
 
-            // Add to file memory
-            sentEmails.push({ email, sentAt });
+            // Skip if already sent
+            if (sentSet.has(email)) {
+                continue;
+            }
 
-            // Save updated file
-            fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
+            try {
+                await sendMail(email);
+                console.log("📨 Sent:", email);
 
-            console.log("⏳ waiting for 30 sec");
-            await new Promise(res => setTimeout(res, 30000));
+                // Create timestamp
+                const sentAt = getISTTimestamp()
 
-        } catch (err) {
-            console.log("❌ Failed:", email, err.response || err);
+                // Add to file memory
+                sentEmails.push({ email, sentAt });
+
+                // Save updated file
+                fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
+
+                console.log("⏳ waiting for 30 sec");
+                await new Promise(res => setTimeout(res, 30000));
+
+            } catch (err) {
+                console.log("❌ Failed:", email, err.response || err);
+            }
         }
+
+
+    } catch (err) {
+        console.error("❌ Process failed", err);
+    } finally {
+        isRunning = false;
+        console.log("✅ Email process finished");
     }
-
-
-    console.log({ message: '✅ completed' })
 }
 
 export const health = (req, res) => {
