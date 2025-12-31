@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { send } from "./controller.js";
+import { processEmails } from "./controller.js";
 
 cron.schedule(
   "*/30 * * * *",

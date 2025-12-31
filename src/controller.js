@@ -4,7 +4,7 @@ import { scrapePosts } from "./linkedin_scraper.js";
 import { sendMail } from "./sendMail.js";
 import getISTTimestamp from "./utils/time.js";
 let isRunning = false;
-async function processEmails() {
+export async function processEmails() {
     if (isRunning) {
         console.log("⏭️ Previous job still running, skipping this run");
         return;
@@ -35,6 +35,7 @@ async function processEmails() {
 
             try {
                 if (!first) {
+                    console.log("⏳ waiting for 30 sec");
                     await new Promise(res => setTimeout(res, 30000));
                 }
                 await sendMail(email);
@@ -47,15 +48,14 @@ async function processEmails() {
                 sentEmails.push({ email, sentAt });
 
                 // Save updated file
-                fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
-
-                console.log("⏳ waiting for 30 sec");
                 first = false;
-
+                
             } catch (err) {
                 console.log("❌ Failed:", email, err.response || err);
             }
         }
+        fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
+        console.log("✅ All emails processed and saved");
 
 
     } catch (err) {
