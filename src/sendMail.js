@@ -24,8 +24,8 @@ export async function sendMail(to) {
         html: htmlTemp,
         attachments: [
             {
-                filename: "Altaf_Khan_Resume.pdf",
-                path: path.join(__dirname, "Altaf_Khan_Resume.pdf")
+                filename: "Altaf_Resume.pdf",
+                path: path.join(__dirname, "Altaf_Resume.pdf")
             }
         ]
     });

@@ -16,6 +16,7 @@ export async function processEmails() {
         const emailFilePath = path.join(process.cwd(), "src", "emailSent.json");
 
         const emails = await scrapePosts();
+        console.log("Total emails found:", emails);
 
         // Load sent emails file
         let sentEmails = [];
@@ -46,6 +47,7 @@ export async function processEmails() {
 
                 // Add to file memory
                 sentEmails.push({ email, sentAt });
+                fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
 
                 // Save updated file
                 first = false;
@@ -54,7 +56,6 @@ export async function processEmails() {
                 console.log("❌ Failed:", email, err.response || err);
             }
         }
-        fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
         console.log("✅ All emails processed and saved");
 
 
