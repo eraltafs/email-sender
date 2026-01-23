@@ -16,7 +16,6 @@ export async function processEmails() {
         const emailFilePath = path.join(process.cwd(), "src", "emailSent.json");
 
         const emails = await scrapePosts();
-        console.log("Total emails found:", emails);
 
         // Load sent emails file
         let sentEmails = [];
