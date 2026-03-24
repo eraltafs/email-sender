@@ -25,7 +25,6 @@ export async function scrapePosts(maxScroll = 6) {
     const page = await context.newPage();
     await page.goto(SEARCH_URL, { timeout: 60000 });
     await page.waitForTimeout(5000);
-    await page.screenshot({ path: "debug.png", fullPage: true });
 
 
     // ----- Scroll to load more posts -----
