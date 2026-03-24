@@ -26,8 +26,6 @@ export async function scrapePosts(maxScroll = 6) {
     await page.goto(SEARCH_URL, { timeout: 60000 });
     await page.waitForTimeout(5000);
 
-
-    // ----- Scroll to load more posts -----
     for (let i = 0; i < maxScroll; i++) {
         await page.mouse.wheel(0, 3000);
         await page.waitForTimeout(2000);
