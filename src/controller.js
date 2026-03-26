@@ -9,6 +9,7 @@ export async function processEmails() {
         console.log("⏭️ Previous job still running, skipping this run");
         return;
     }
+    console.log("PROCESS START", Date.now());
 
     isRunning = true;
     try {
@@ -38,15 +39,15 @@ export async function processEmails() {
                     console.log("⏳ waiting for 30 sec");
                     await new Promise(res => setTimeout(res, 30000));
                 }
-                await sendMail(email);
                 console.log("📨 Sent:", email);
-
+                
                 // Create timestamp
                 const sentAt = getISTTimestamp()
-
+                
                 // Add to file memory
                 sentEmails.push({ email, sentAt });
                 fs.writeFileSync(emailFilePath, JSON.stringify(sentEmails, null, 2));
+                await sendMail(email);
 
                 // Save updated file
                 first = false;
